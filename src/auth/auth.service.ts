@@ -3,6 +3,7 @@ import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { TokenExpiredError } from 'jsonwebtoken';
+import { createHash, randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
@@ -155,7 +156,7 @@ export class AuthService {
       throw new Error('Refresh token payload is invalid.');
     }
 
-    const tokenHash = await bcrypt.hash(refreshToken, this.getHashRounds());
+    const tokenHash = this.hashRefreshToken(refreshToken);
 
     await this.prisma.refreshToken.create({
       data: {
@@ -167,9 +168,10 @@ export class AuthService {
   }
 
   private async findValidRefreshToken(userId: string, refreshToken: string) {
-    const candidates = await this.prisma.refreshToken.findMany({
+    return this.prisma.refreshToken.findFirst({
       where: {
         userId,
+        tokenHash: this.hashRefreshToken(refreshToken),
         revokedAt: null,
         expiresAt: {
           gt: new Date(),
@@ -177,22 +179,11 @@ export class AuthService {
       },
       select: {
         id: true,
-        tokenHash: true,
       },
       orderBy: {
         createdAt: 'desc',
       },
     });
-
-    for (const candidate of candidates) {
-      const isValid = await bcrypt.compare(refreshToken, candidate.tokenHash);
-
-      if (isValid) {
-        return candidate;
-      }
-    }
-
-    return null;
   }
 
   private verifyRefreshToken(refreshToken: string): JwtPayload {
@@ -228,6 +219,7 @@ export class AuthService {
       email: user.email,
       sub: user.id,
       type: tokenType,
+      jti: randomUUID(),
     };
 
     const expiresIn =
@@ -261,5 +253,9 @@ export class AuthService {
     }
 
     return 10;
+  }
+
+  private hashRefreshToken(refreshToken: string): string {
+    return createHash('sha256').update(refreshToken).digest('hex');
   }
 }

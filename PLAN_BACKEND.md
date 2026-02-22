@@ -8,58 +8,24 @@
 
 ---
 
-## 문서 운영 (MD 2개로 관리)
+## 문서 운영 (역할 분리)
 
-- **전체(메인/정본)**: `PLAN_BACKEND.md`
-- **진행(작업 로그)**: `.opencode/plans/BACKEND_PROGRESS.md`
+- 문서 인덱스: `README.md`
+- 계획/우선순위(정본): `PLAN_BACKEND.md`
+- 진행/로그: `.opencode/plans/BACKEND_PROGRESS.md`
+- 전역 규칙(정본): `docs/API_RESPONSE_FORMAT.md` (응답/에러 + CORS)
+- 엔드포인트 계약: `docs/*_API.md` (예: `docs/AUTH_API.md`, `docs/ME_API.md`)
+- 구조/온보딩: `docs/PROJECT_STRUCTURE.md`
 
 원칙:
-- 기능/설계/우선순위/계약 변경은 이 문서(PLAN)에 반영
-- 작업 단위 완료 체크/메모/트러블슈팅은 진행 문서(PROGRESS)에만 기록
+- 같은 내용이 2개 문서에 겹치면 한쪽은 **링크로 대체**합니다.
+- Quick Start는 `README.md`에만 유지합니다.
 
 ---
 
 ## 빠른 시작 (로컬)
 
-### 1) 의존성 설치
-
-```bash
-npm install
-```
-
-### 2) DB(Postgres) 실행
-
-```bash
-docker compose up -d
-```
-
-### 3) 환경변수(.env)
-
-`.env`는 gitignore 대상입니다. 최소 아래 키가 필요합니다.
-
-```env
-POSTGRES_USER=...
-POSTGRES_PASSWORD=...
-POSTGRES_DB=...
-DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/DB?schema=public"
-JWT_SECRET="..."
-ACCESS_EXPIRES="3h"
-REFRESH_EXPIRES="7d"
-HASH_ROUNDS="10"
-PORT="3001"
-```
-
-### 4) Prisma 마이그레이션
-
-```bash
-npx prisma migrate dev
-```
-
-### 5) 서버 실행
-
-```bash
-npm run start:dev
-```
+- `README.md`의 `Quick Start (Local)` 섹션을 참고하세요.
 
 ---
 
@@ -101,11 +67,9 @@ npm run start:dev
   - 요청: `X-Refresh-Token` 헤더
   - 응답: `{ accessToken, refreshToken }`
 
-### 2.2 에러 응답 표준(강추)
-- 성공: `{ data: T }`
-- 실패: `{ error: { code, message, details? } }`
+### 2.2 전역 응답/에러 포맷 (계약 정본)
 
-> 프론트에서 `code` 기반으로 UX 분기가 가능해집니다.
+- 단일 출처: `docs/API_RESPONSE_FORMAT.md`
 
 ---
 

@@ -2,13 +2,11 @@
 
 ## Base URL
 
-- Local: `http://localhost:${PORT}` (if `PORT` is unset, defaults to `3000`)
+- Local: `http://localhost:${PORT}` (default: `3000`, 권장: `3001`)
 
-## Global Response Format
+## Global Conventions
 
-- Success (HTTP `2xx`): `{ "data": <payload> }`
-- Error (HTTP `4xx/5xx`): `{ "error": { "code": "<CODE>", "message": "<MESSAGE>", "details"?: <ANY> } }`
-- Full spec: `docs/API_RESPONSE_FORMAT.md`
+- Success/Error wire format + CORS: `docs/API_RESPONSE_FORMAT.md`
 
 ## Tokens
 
@@ -91,27 +89,16 @@ Response (`200`):
 Notes:
 - This is derived from JWT payload (not full DB profile).
 
-## Error Format
+## Error Cases
 
-- Validation error (`400`) example:
-```json
-{
-  "error": {
-    "code": "BAD_REQUEST",
-    "message": ["..."],
-    "details": { "statusCode": 400, "message": ["..."], "error": "Bad Request" }
-  }
-}
-```
-
-- Auth error (`401`) examples:
-  - invalid credentials
-  - invalid token / expired token
+- Error shape: `docs/API_RESPONSE_FORMAT.md`
+- `400 BAD_REQUEST`: validation error (email/password/nickname)
+- `401 UNAUTHORIZED`: invalid credentials, invalid/expired tokens (access/refresh), email already exists (signup)
 
 ## Quick cURL
 
 ```bash
-BASE="http://localhost:3000"
+BASE="http://localhost:${PORT:-3001}"
 
 curl -X POST "$BASE/auth/signup" -H "Content-Type: application/json" \
   -d '{"email":"user@example.com","password":"123456","nickname":"cch"}'
@@ -123,13 +110,3 @@ curl -X POST "$BASE/auth/refresh" -H "X-Refresh-Token: $REFRESH"
 curl -X POST "$BASE/auth/logout" -H "X-Refresh-Token: $REFRESH"
 curl -X GET  "$BASE/auth/me" -H "Authorization: Bearer $ACCESS"
 ```
-
-## CORS Note (Browser Calls)
-
-Local dev expects:
-- frontend: `http://localhost:3000`
-- backend: `http://localhost:3001`
-
-Backend enables CORS for `http://localhost:3000` and allows header `X-Refresh-Token`.
-
-If your frontend origin differs, set `FRONTEND_ORIGIN` when running the backend.

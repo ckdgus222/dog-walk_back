@@ -2,6 +2,8 @@
 
 This project uses a **global success wrapper** + a **global exception filter**.
 
+> This document is the **single source of truth** for response/error wire format and CORS rules.
+
 ## TL;DR
 
 - Success (HTTP `2xx`): `{ "data": <payload> }`
@@ -89,5 +91,15 @@ Server error (`500`)
 
 ## CORS (Local Dev)
 
-- Frontend (`http://localhost:3000`) calling backend (`http://localhost:3001`) requires CORS.
-- Backend allows origin `FRONTEND_ORIGIN` (default: `http://localhost:3000`) and header `X-Refresh-Token`.
+- Recommended local ports:
+  - frontend: `http://localhost:3000`
+  - backend: `http://localhost:3001` (set `PORT=3001`)
+- Allowed origins:
+  - `FRONTEND_ORIGIN` (default: `http://localhost:3000`)
+  - `http://127.0.0.1:3000`
+- Allowed methods: `GET`, `POST`, `PATCH`, `DELETE`, `OPTIONS`
+- Allowed headers: `Content-Type`, `Authorization`, `X-Refresh-Token`
+
+Notes:
+- Requests without an `Origin` header (e.g. curl/Postman) are allowed.
+- If your frontend origin differs, set `FRONTEND_ORIGIN` before running the backend.
