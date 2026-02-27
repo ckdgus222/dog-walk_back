@@ -13,29 +13,73 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id           String @id @default(uuid())
-  email        String @unique
-  passwordHash String
-  nickname     String
-  profileImage String?
-  bio          String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String         @id @default(uuid())
+  email         String         @unique
+  passwordHash  String
+  nickname      String
+  profileImage  String?
+  bio           String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   refreshTokens RefreshToken[]
+  dogs          Dog[]
+  uploadedMedia Media[]        @relation("UserUploadedMedia")
 }
 
 model RefreshToken {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
   tokenHash String
   expiresAt DateTime
   revokedAt DateTime?
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
   @@index([revokedAt])
+}
+
+enum DogGender {
+  male
+  female
+}
+
+enum MediaPurpose {
+  DOG_PROFILE
+  FEED_POST
+}
+
+model Dog {
+  id          String    @id @default(uuid())
+  ownerId     String
+  name        String
+  breed       String
+  birthYear   String?
+  gender      DogGender
+  personality String[]
+  photoFileId String?   @unique
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  owner       User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  photoFile   Media?    @relation(fields: [photoFileId], references: [id], onDelete: SetNull)
+
+  @@index([ownerId])
+}
+
+model Media {
+  id             String       @id @default(uuid())
+  purpose        MediaPurpose
+  storageKey     String       @unique
+  url            String
+  mimeType       String
+  size           Int
+  uploaderUserId String?
+  createdAt      DateTime     @default(now())
+  uploader       User?        @relation("UserUploadedMedia", fields: [uploaderUserId], references: [id], onDelete: SetNull)
+  dog            Dog?
+
+  @@index([purpose])
+  @@index([uploaderUserId])
 }

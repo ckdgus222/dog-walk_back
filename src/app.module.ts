@@ -5,6 +5,8 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { MeModule } from './me/me.module';
+import { DogsModule } from './dogs/dogs.module';
+import { MediaModule } from './media/media.module';
 
 @Module({
   imports: [
@@ -12,6 +14,8 @@ import { MeModule } from './me/me.module';
     PrismaModule,
     AuthModule,
     MeModule,
+    DogsModule,
+    MediaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
